@@ -1,20 +1,22 @@
 import java.io.File
 
+typealias Rucksack = List<Item>
+
 fun main() {
     val inputFileName = "src/main/resources/03.txt"
 
-    val prioritiesSum = File(inputFileName).readLines().sumOf { line ->
-        val rucksackItems = line.map(::Item)
-        val rucksackSize = rucksackItems.size
+    val rucksacks: List<Rucksack> = File(inputFileName).readLines().map { line -> line.map(::Item) }
+    val rucksackChunks: List<List<Rucksack>> = rucksacks.chunked(3)
 
-        val firstCompartment = rucksackItems.subList(0, rucksackSize / 2)
-        val secondCompartment = rucksackItems.subList(rucksackSize / 2, rucksackSize)
-
-        val commonItemInBothCompartments = firstCompartment.intersect(secondCompartment.toSet()).firstOrNull()
-        commonItemInBothCompartments?.priority ?: 0
+    val commonItemForEveryRucksackChunk: List<Item?> =
+        rucksackChunks.map { (firstRucksack, secondRucksack, thirdRucksack) ->
+            firstRucksack.intersect(secondRucksack.toSet()).intersect(thirdRucksack.toSet()).firstOrNull()
+        }
+    val sumOfPrioritiesOfCommonItemForEveryRucksackChunk: Int = commonItemForEveryRucksackChunk.sumOf {
+        it?.priority ?: 0
     }
 
-    println(prioritiesSum)
+    println(sumOfPrioritiesOfCommonItemForEveryRucksackChunk)
 }
 
 data class Item(val type: Char) {
